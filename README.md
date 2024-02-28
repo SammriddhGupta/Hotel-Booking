@@ -1,0 +1,1 @@
+Aim of this project is to learn Event Driven Microservices with Python and AWS
