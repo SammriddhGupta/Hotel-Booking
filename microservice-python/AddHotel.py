@@ -1,9 +1,12 @@
 import json
 import boto3
 import logging
-import multipart
+import multipart as python_multipart
 import base64
 import jwt
+import os
+import io
+import uuid
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -53,6 +56,8 @@ def handler(event, context):
     region = os.environ.get("AWS_REGION")
     
     s3_client = boto3.client("s3", region_name = region)
+    dynamoDb = boto3.resource("dynamodb", region_name = region)
+    table = dynamoDb.Table("Hotels")
     
     try:
         s3_client.put_object(
@@ -60,6 +65,20 @@ def handler(event, context):
             Key = file_name,
             Body = file
         )
+        
+        hotel = {
+            "UserId": user_id,
+            "Id": str(uuid.uuid4()),
+            "Name": hotel_name,
+            "CityName": hotel_city,
+            "Price": int(hotel_price),
+            "Rating": int(hotel_rating),
+            "FileName": file_name,
+        }
+        
+        table.put_item(Item=hotel)
+        
+        
     except Exception as e:
         return {
             "statusCode" : 500,
