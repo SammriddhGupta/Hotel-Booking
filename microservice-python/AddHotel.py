@@ -48,6 +48,26 @@ def handler(event, context):
                 "Error" : "Sorry, you are not a member of admin group"
             })
         }
+        
+    bucket_name = os.environ.get("bucketName")
+    region = os.environ.get("AWS_REGION")
+    
+    s3_client = boto3.client("s3", region_name = region)
+    
+    try:
+        s3_client.put_object(
+            Bucket = bucket_name,
+            Key = file_name,
+            Body = file
+        )
+    except Exception as e:
+        return {
+            "statusCode" : 500,
+            "body" : json.dumps({
+                "Error" : "Oh no, uploading the hotel photo failed"
+            })
+        }
+        
     
     logger.info("This is some information right here")
     
