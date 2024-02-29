@@ -3,6 +3,7 @@ import boto3
 import logging
 import multipart
 import base64
+import jwt
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -36,6 +37,17 @@ def handler(event, context):
     id_token = parts.get('idToken')
     
     file = parts.get('filedata').file.read()
+    
+    token = jwt.decode(id_token, verify=False)
+    group = token.get("cognito:groups")
+    
+    if group is None or group != "Admin":
+        return {
+            "statusCode" : 401,
+            "body" : json.dumps({
+                "Error" : "Sorry, you are not a member of admin group"
+            })
+        }
     
     logger.info("This is some information right here")
     
